@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "pnpm --parallel run dev",
-    "build": "pnpm --r run build",
+    "dev": "pnpm --recursive --parallel run dev",
+    "build": "pnpm --recursive run build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

@@ -1,21 +1,18 @@
-import pkg from 'knex';
-import config from './config.mts';
+import knex from 'knex';
 
-const { knex } = pkg;
+const environment =
+  process.env.NODE_ENV === 'test'
+    ? 'test'
+    : process.env.NODE_ENV === 'production'
+      ? 'production'
+      : 'development';
 
-type ConfigKeys = keyof typeof config;
+const connection = {
+  test: process.env.DATABASE_TEST_URL,
+  development: process.env.DATABASE_DEV_URL,
+  production: process.env.DATABASE_URL_DOCKER,
+}[environment];
 
-const allowedEnvs: ConfigKeys[] = [
-  'test',
-  'development',
-  'staging',
-  'production',
-];
-const nodeEnv = process.env.NODE_ENV;
-
-const environment: ConfigKeys =
-  allowedEnvs.find((env) => env === nodeEnv) || 'development';
-
-const database = knex(config[environment]);
+const database = knex({ client: 'postgresql', connection });
 
 export default database;

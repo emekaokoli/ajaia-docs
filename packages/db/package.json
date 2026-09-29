@@ -11,14 +11,19 @@
     }
   },
   "scripts": {
-    "build": "echo '[DB] Building package...' && tsc",
-    "dev": "echo '[DB] Starting watch mode...' && tsc -w"
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch"
   },
   "author": "Emeka Okoli",
   "packageManager": "pnpm@10.33.0",
   "dependencies": {
     "@ajaia/schema": "workspace:*",
-    "drizzle-orm": "^0.38.2",
+    "dotenv": "^16.4.7",
+    "knex": "^3.1.0",
     "pg": "^8.13.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.3",
+    "typescript": "~6.0.3"
   }
 }
