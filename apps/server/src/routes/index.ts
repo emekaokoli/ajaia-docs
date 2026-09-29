@@ -1,8 +1,12 @@
-import express from 'express';
+import { Router } from 'express';
+import { authRouter } from './auth';
+import { documentsRouter } from './documents';
+import { sharesRouter } from './shares';
 
-const router = express.Router();
+const router: Router = Router();
 
-router.use('/api', () => {});
+router.use('/auth', authRouter);
+router.use('/documents', documentsRouter);
+router.use('/documents', sharesRouter);
 
 export { router };
-

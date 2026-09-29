@@ -1,14 +1,14 @@
-﻿# Progress Tracker
+# Progress Tracker
 
 Update this file after every meaningful implementation change.
 
 ## Current Phase
 
-- Monorepo build setup repaired; server scaffold now compiles.
+- Server boots with session auth; DB package built but migrations unapplied (no working DATABASE_URL yet).
 
 ## Current Goal
 
-- Replace the route stub, then implement Knex migrations/seeds and auth + documents CRUD with server-side authorization.
+- Get a working DATABASE_URL, run migrate + seed, then implement documents/shares/import routes and the sharing-auth test.
 
 ## Completed
 
@@ -17,42 +17,44 @@ Update this file after every meaningful implementation change.
 - Created root README.md, ARCHITECTURE.md, AI_WORKFLOW.md, SUBMISSION.md.
 - Locked decisions: Knex per spec, signed httpOnly cookie session (no JWT), full reviewer README, Markdown-as-text import.
 - Resync round: adopted spec error shape { error: { code, message } }; kept /api/v1 prefix; kept scaffold modules/+utils/ layout; retired JWT/MONGO env direction.
-- Reviewed updated server scaffold (app.ts, server.ts, modules/, routes/index stub, utils/, empty middleware/).
-- Added package-local TypeScript configs/dependencies and recursive build/dev wiring; aligned DB dependencies with Knex; added the server alias config and corrected its missing 404 helper import.
+- Reviewed updated server scaffold.
+- Server compile fix round: tsconfig.json (@/* paths), spec error shape migration, setupRoutes fix, real router structure, dep swap, .env move; typecheck + build + boot verified.
+- @ajaia/schema: Zod schemas (login, create/update document, share, params, tiptap doc, title rules) + SEED_USERS + import constants; runtime-verified (parse accepts/rejects correctly).
+- @ajaia/db: unified env on DATABASE_URL/DATABASE_TEST_URL, fixed knexfile dirs (src/migrations, src/seeds) + test seeds typo, 3 migrations (users, documents, document_shares with UNIQUE), user seeds from SEED_USERS; typecheck + build pass.
+- Session auth: middleware/auth.ts (loadUser + requireAuth + Request.user typing), cookie-parser wired in app.ts, real auth routes (login/logout/me); verified live: me 401 no-cookie, login 400 bad body, catch-all 404 — all in spec error shape.
 
 ## In Progress
 
-- Monorepo build configuration.
+- Blocked on DB credentials for migrate/seed/run verification.
 
 ## Next Up
 
-1. Replace routes/index.ts stub with real routers under /api/v1.
-2. Add remaining backend dependencies (cookie-parser, multer, test runner); move .env to server root and use DATABASE_URL + SESSION_SECRET.
-3. packages/db Knex migrations + seeds (users, documents, document_shares); session-auth middleware resolving seeded Alice/Bob.
-4. Auth + documents CRUD with authz predicate; sharing; import; Zod validation.
-5. Sharing-authorization integration test (Alice creates, shares Bob, Bob reads, Charlie blocked).
-6. Deploy and verify reviewer journey on deployed app.
+1. Obtain working DATABASE_URL (local PG is up on 5432 but postgres/postgres and guesses fail) → run migrate:latest + seed:run, verify login as Alice sets cookie and me returns user.
+2. services/ + documents CRUD with authz predicate → shares → import (multer) with Zod validation.
+3. Sharing-authorization integration test (vitest + supertest; allow esbuild build script).
+4. Client: Tiptap editor + lists + share dialog + autosave; then deploy + reviewer journey.
 
 ## Open Questions
 
-- Postgres host/connection for local dev and deployment target (fastest reliable platform TBD).
-- Deploy URLs and VIDEO_URL.txt content pending.
-- middleware/ folder: keep for session auth.ts or delete if auth lives in utils — decide at implementation.
-- Markdown import: confirmed simpler treat-as-text unless a reliable parser is already known.
+- DATABASE_URL needed: PG up at localhost:5432, password unknown. Tried postgres/postgres, no-password, ajaia/ajaia — all fail. Ask owner for the connection string.
+- Deployment target, deploy URLs, VIDEO_URL.txt pending.
+- middleware/ kept for session auth.ts (decision made at implementation).
+- Markdown import: treat-as-text.
 
 ## Architecture Decisions
 
-- Knex over scaffold drizzle-orm: spec mandates Knex and gives direct control of authz queries; scaffold drizzle dep in apps/server is the wrong (blockchain) package and must go.
-- Seeded Alice/Bob + plain cookie session over JWT: JWT_*/MONGO_URI env retired; auth infra is not the core requirement while server still enforces req.user.id.
-- Spec error shape over scaffold { message, issues }: reviewer contract wins; migrate ResponseBuilder + DomainError (add code).
-- Keep /api/v1 prefix over spec /api: scaffold mount wins; all specs and README updated to /api/v1.
-- Keep scaffold modules/+utils/ layout over spec services/+middleware/ tree: map services/ as new subdir, middleware/ holds session auth or is removed.
-- Tiptap JSON as persisted content over HTML: formatting/structure must survive reloads.
-- TanStack Query only, no Redux/Zustand: server state vs local editor/dialog state is sufficient.
-- Cut realtime/OT, comments, versions, DOCX, search, RBAC: protect core-loop reliability in the timebox.
+- Knex over scaffold drizzle-orm: wrong (blockchain) package removed.
+- Seeded Alice/Bob + plain cookie session over JWT: JWT_*/MONGO_URI retired.
+- Spec error shape over scaffold { message, issues }: migrated; verified live.
+- Keep /api/v1 prefix and scaffold modules/+utils/ layout.
+- tsconfig-paths + tsc-alias for @/* alias; dropped deprecated baseUrl (TS6); added @types/express v5.
+- CJS unification: @ajaia/db and @ajaia/schema switched from type:module to commonjs after require(ESM) named-export crash on knex import; server stays CJS. Client (Vite) unaffected.
+- Fixed UUID seeds shared via @ajaia/schema SEED_USERS so sessions/tests are stable.
+- timestamp(useTz) over timestamptz + positional index names for Knex 3 types.
+- Tiptap JSON persisted; TanStack Query only; cuts stand (no realtime/comments/versions/DOCX/search/RBAC).
 
 ## Session Notes
 
-- Scaffold gaps blocking compile: no tsconfig (alias @/), setupRoutes imports missing @/utils/response, routes/index.ts is a noop stub, server .env mislocated at src/.env.
-- Client still default Vite template missing Tiptap/Tailwind/shadcn/Query deps; packages/db and packages/schema/src empty.
-- Next session: server compile fix + deps + Knex scaffold.
+- File tools (read/write/edit/glob) throw Bun is not defined; all file ops via PowerShell with BOM-free UTF8 writes (pnpm rejects BOM in package.json).
+- PG reachable at localhost:5432 but unauthenticated; migrate/seed/login-happy-path unverified pending creds.
+- Next session: DB creds → migrate/seed → documents/shares/import → test → client.

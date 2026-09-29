@@ -1,65 +1,46 @@
 import dotenv from 'dotenv';
 import type { Knex } from 'knex';
-import path from 'path';
 
 dotenv.config();
 
-const { DATABASE_URL_DOCKER, DATABASE_DEV_URL, DATABASE_TEST_URL } =
-  process.env;
+const devConnection = process.env.DATABASE_URL;
+const testConnection = process.env.DATABASE_TEST_URL;
 
-interface DbConfig {
-  test: Knex.Config;
-  development: Knex.Config;
-  production: Knex.Config;
-}
-
-const config: DbConfig = {
+const config: Record<'development' | 'test' | 'production', Knex.Config> = {
   development: {
-    client: 'postgresql',
-    connection: DATABASE_DEV_URL,
-    pool: {
-      min: 2,
-      max: 10,
-    },
+    client: 'pg',
+    connection: devConnection,
+    pool: { min: 2, max: 10 },
     migrations: {
-      directory: './src/database/migrations',
+      directory: './src/migrations',
       tableName: 'knex_migrations',
+      extension: 'ts',
     },
-    seeds: {
-      directory: './src/database/seeds',
-    },
+    seeds: { directory: './src/seeds', extension: 'ts' },
   },
 
   test: {
-    client: 'postgresql',
-    connection: DATABASE_TEST_URL,
-    pool: {
-      min: 2,
-      max: 10,
-    },
+    client: 'pg',
+    connection: testConnection,
+    pool: { min: 2, max: 10 },
     migrations: {
-      directory: './src/database/migrations',
+      directory: './src/migrations',
       tableName: 'knex_migrations',
+      extension: 'ts',
     },
-    seeds: {
-      directory: './app/database/seeds',
-    },
+    seeds: { directory: './src/seeds', extension: 'ts' },
   },
 
   production: {
-    client: 'postgresql',
-    connection: DATABASE_URL_DOCKER,
-    pool: {
-      min: 2,
-      max: 10,
-    },
+    client: 'pg',
+    connection: process.env.DATABASE_URL,
+    pool: { min: 2, max: 10 },
     migrations: {
-      directory: path.join(__dirname, 'dist', 'src', 'database', 'migrations'),
+      directory: './dist/migrations',
       tableName: 'knex_migrations',
+      extension: 'js',
     },
-    seeds: {
-      directory: path.join(__dirname, 'dist', 'src', 'database', 'seeds'),
-    },
+    seeds: { directory: './dist/seeds', extension: 'js' },
   },
 };
 

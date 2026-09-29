@@ -1,4 +1,5 @@
 import { type Response } from 'express';
+
 export interface PaginatedResponse<T> {
   data: T[];
   pagination: {
@@ -9,6 +10,23 @@ export interface PaginatedResponse<T> {
     totalPages: number;
     limit: number;
   };
+}
+
+function defaultCodeFor(statusCode: number): string {
+  switch (statusCode) {
+    case 400:
+      return 'BAD_REQUEST';
+    case 401:
+      return 'UNAUTHORIZED';
+    case 403:
+      return 'FORBIDDEN';
+    case 404:
+      return 'NOT_FOUND';
+    case 422:
+      return 'UNPROCESSABLE';
+    default:
+      return 'INTERNAL_ERROR';
+  }
 }
 
 export class ResponseBuilder {
@@ -28,11 +46,13 @@ export class ResponseBuilder {
     res: Response,
     statusCode: number,
     message: string,
-    issues?: string[],
+    code?: string,
   ): void {
     res.status(statusCode).json({
-      message,
-      issues,
+      error: {
+        code: code ?? defaultCodeFor(statusCode),
+        message,
+      },
     });
   }
 
