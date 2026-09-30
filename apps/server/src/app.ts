@@ -1,7 +1,9 @@
+import 'dotenv/config';
+import { loadUser } from '@/middleware/auth';
 import { errorHandler } from '@/modules/errorHandler';
 import { setUpRoutes } from '@/modules/setupRoutes';
+import cookieParser from 'cookie-parser';
 import cors from 'cors';
-import 'dotenv/config';
 import express, { Application, json, urlencoded } from 'express';
 import { rateLimit } from 'express-rate-limit';
 import helmet from 'helmet';
@@ -20,11 +22,13 @@ export const createApp = (): Application => {
   });
 
   app.use(json());
+  app.use(urlencoded({ extended: true }));
+  app.use(cookieParser(process.env.SESSION_SECRET ?? 'dev-secret-change-me'));
   app.use(cors());
   app.use(helmet());
   app.use(limiter);
-  app.use(urlencoded({ extended: true }));
   app.use(pino());
+  app.use(loadUser);
   setUpRoutes(app);
   app.use(errorHandler());
   return app;
