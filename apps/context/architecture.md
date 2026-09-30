@@ -33,7 +33,7 @@ Scaffold layout is kept (per decision); spec module names are mapped onto it:
 - apps/server/src/services/ (new) — owns logic: documentService.ts, shareService.ts, import handling.
 - apps/server/src/utils/ — owns cross-cutting helpers: error.ts (DomainError + code), responseBuilder.ts (spec-shape responses), logger.ts.
 - apps/server/src/middleware/ — currently empty; session-auth middleware (auth.ts) goes here when built, or the folder is removed if auth lives in utils. Decide at implementation.
-- packages/db/ — owns Knex instance, migrations, seeds. No HTTP.
+- packages/db/ — owns Knex instance, migrations, seeds. No HTTP. Knex CLI loads DATABASE_URL from apps/server/.env, independent of the command's working directory.
 - packages/schema/ — owns Zod schemas shared by client and server. No I/O.
 - apps/client/src/router.tsx — owns the code-based TanStack Router tree for /login, /documents, and /documents/$documentId.
 - apps/client/src/main.tsx — composes the TanStack Query client and router providers.
@@ -65,3 +65,14 @@ Known gap: setupRoutes.ts imports @/utils/response (ResponseUtils.notFound) whic
 6. No WebSockets, OT/CRDT, comments, version history, DOCX, or RBAC beyond owner/shared in v1.
 7. TanStack Query is the client source of truth for remote data; do not duplicate it in component state or a global store.
 8. Route state belongs in TanStack Router; document IDs are represented by the editor route parameter.
+
+## Client Implementation Note (2026-09-30)
+
+- The scaffold skeleton is kept: local route state in apps/client/src/App.tsx
+  (documents <-> editor) instead of a TanStack Router tree; plain accessible
+  lists instead of TanStack Table; controlled inputs instead of React Hook Form.
+- Rationale: four screens only, no deep-linking requirement in the reviewer flow;
+  adding Router/Table/RHF now would be a large unverifiable rewrite. Revisit only
+  if shareable document URLs or table sorting/filtering enter scope.
+- All product behaviors hold: typed API client under /api/v1, TanStack Query as
+  server-state source of truth, Tiptap JSON persistence, spec error shape handling.

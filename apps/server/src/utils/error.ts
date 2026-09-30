@@ -37,6 +37,10 @@ export class DomainError extends Error {
     return new DomainError(message, code, 422);
   }
 
+  static conflict(message: string, code = 'CONFLICT'): DomainError {
+    return new DomainError(message, code, 409);
+  }
+
   static internalError(message = 'Something went wrong!', code = 'INTERNAL_ERROR'): DomainError {
     return new DomainError(message, code, 500);
   }

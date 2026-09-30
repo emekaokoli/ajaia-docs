@@ -1,7 +1,8 @@
 import dotenv from 'dotenv';
 import type { Knex } from 'knex';
+import { resolve } from 'node:path';
 
-dotenv.config();
+dotenv.config({ path: resolve(__dirname, '../../apps/server/.env') });
 
 const devConnection = process.env.DATABASE_URL;
 const testConnection = process.env.DATABASE_TEST_URL;

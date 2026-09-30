@@ -10,11 +10,10 @@ const environment =
 const connectionMap: Record<string, string | undefined> = {
   test: process.env.DATABASE_TEST_URL,
   development: process.env.DATABASE_URL,
-  production: process.env.DATABASE_URL,
+  production: process.env.DATABASE_PROD,
 };
 
-const connection =
-  connectionMap[environment] ?? 'postgres://postgres:postgres@localhost:5432/ajaia_docs';
+const connection = connectionMap[environment];
 
 export const db: Knex = createKnex({
   client: 'pg',

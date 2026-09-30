@@ -1,9 +1,9 @@
+import 'dotenv/config';
 import { loadUser } from '@/middleware/auth';
 import { errorHandler } from '@/modules/errorHandler';
 import { setUpRoutes } from '@/modules/setupRoutes';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
-import 'dotenv/config';
 import express, { Application, json, urlencoded } from 'express';
 import { rateLimit } from 'express-rate-limit';
 import helmet from 'helmet';
